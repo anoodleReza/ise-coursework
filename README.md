@@ -1,129 +1,88 @@
-# Replication Instructions for Deep Learning Configuration Performance Prediction
+# User Manual
 
-## Overview
-This document provides detailed instructions for replicating the experimental results reported in our study comparing deep learning approaches against linear regression for software configuration performance prediction.
+## Setup
+1. Ensure all dependencies listed in `requirements.pdf` are installed
+2. Clone or download the project repository
+3. Navigate to the project directory in your terminal or command prompt
 
-## Environment Setup
-1. **Install required software**:
-   - Python 3.8 or higher
-   - All dependencies listed in `requirements.pdf`
+## Data Format Requirements
+The tool expects CSV files with the following format:
+- Each row represents a different configuration
+- Columns represent configuration options (features)
+- The last column must contain the performance metric (target variable)
 
-2. **Clone the repository or unzip the provided code package**:
-   ```bash
-   git clone https://github.com/username/repository-name.git
-   cd repository-name
-   ```
+Example data format:
+```
+option1,option2,option3,...,performance_value
+1,0,1,...,123.45
+0,1,0,...,98.76
+```
 
-3. **Confirm directory structure**:
-   Ensure the following directories exist (create them if needed):
-   ```bash
-   mkdir -p results/data
-   ```
+## Directory Structure
+The tool expects datasets to be organized in the following structure:
+```
+datasets/
+├── system1/
+│   ├── dataset1.csv
+│   └── dataset2.csv
+├── system2/
+│   ├── dataset1.csv
+│   └── dataset2.csv
+...
+```
 
-## Dataset Preparation
-1. **Download the datasets**:
-   - The complete dataset collection can be downloaded from: [Dataset Link]
-   - Alternatively, use the provided sample datasets in the `datasets` folder
+## Running the Tool
+To run the tool with default settings:
+```bash
+python deep.py
+```
 
-2. **Place datasets in the correct structure**:
-   ```
-   datasets/
-   ├── batlik/
-   │   ├── dataset1.csv
-   │   └── dataset2.csv
-   ├── dconvert/
-   │   ├── dataset1.csv
-   ...
-   ```
+### Jupyter Notebook Alternative
+Alternatively, you can use the provided Jupyter notebook:
 
-3. **Verify dataset format**:
-   - Each CSV file should contain configuration options as columns
-   - The last column must be the performance metric
-   - No missing values should be present
+1. Start Jupyter server:
+```bash
+jupyter notebook
+```
 
-## Running the Experiment
-1. **Execute the main script**:
-   ```bash
-   python deep.py
-   ```
+2. Open the existing notebook in the browser:
+```
+deep.ipynb
+```
 
-2. **For full experiment replication**:
-   - Ensure all nine systems are included in the `systems` list in `deep.py`
-   - Set `num_repeats = 10` for statistical significance
-   - Use `train_frac = 0.7` for the training/testing split
-   - Maintain the default neural network parameters
+3. Execute the notebook:
+   - Either run all cells at once using the "Run All" command from the "Cell" menu
+   - You can modify parameters directly in the notebook cells before execution
 
-3. **Expected runtime**:
-   - Full experiment: 2-8 hours (depending on hardware)
-   - With GPU acceleration: 30 minutes to 2 hours
+## Customizing Parameters
+To modify the experiment parameters, open `deep.py` and adjust the following variables at the beginning of the main function. The same code is available as the last cell of the `deep.ipnb` Jupyter Notebook.
 
-## Statistical Analysis
-To replicate the statistical significance analysis:
+```python
+# Systems to evaluate
+systems = ['batlik', 'dconvert', 'h2', 'jump3r', 'kanzi', 'lrzip', 'x264', 'xz', 'z3']
 
-1. **Examine the output files**:
-   - `results/data/all_results.csv`: Contains average metrics
-   - `results/data/all_results_detailed.csv`: Contains per-repeat metrics
+# Number of repeat experiments
+num_repeats = 10
 
-2. **Verify Wilcoxon signed-rank test results**:
-   - The p-values are reported in the `*_p_value` columns in the results CSV
-   - p < 0.05 indicates a statistically significant difference
-   - Significance is also reported in terminal output
+# Fraction of data used for training (0.7 = 70%)
+train_frac = 0.7
 
-## Expected Results
-The deep learning approach should show:
+# Random seed for reproducibility
+random_seed = 1
 
-1. **Performance improvements**:
-   - Average MAPE improvement: 10-20% over linear regression
-   - Average MAE improvement: 15-25% over linear regression
-   - Average RMSE improvement: 12-22% over linear regression
-   - Average R2 improvement: 5-15% over linear regression
+# Neural network parameters
+epochs = 200
+batch_size = 32
+patience = 10
+```
 
-2. **System-specific variations**:
-   - Better improvements on systems with more complex configurations
-   - Some systems may show minimal improvements
+## Output and Results
+The tool generates the following outputs:
 
-3. **Statistical significance**:
-   - Significant improvements (p < 0.05) in 60-80% of the datasets
+1. Terminal output with progress updates and summary statistics
+2. CSV files in the `results/data/` directory:
+   - `all_results.csv`: Summary metrics for all systems and datasets
+   - `all_results_detailed.csv`: Detailed metrics for each repeat experiment
+   - `training_times.csv`: Comparison of training times for LR and DL models
 
-## Visualizing Results
-To create visualization of the results:
-
-1. **Using the provided Python script**:
-   ```python
-   import pandas as pd
-   import matplotlib.pyplot as plt
-   import seaborn as sns
-   
-   # Load results
-   results = pd.read_csv('results/data/all_results.csv')
-   
-   # Plot MAPE improvement by system
-   plt.figure(figsize=(10, 6))
-   sns.barplot(x='System', y='MAPE_Improv', data=results)
-   plt.title('MAPE Improvement by System (%)')
-   plt.xticks(rotation=45)
-   plt.tight_layout()
-   plt.savefig('results/mape_improvement.png')
-   ```
-
-## Troubleshooting
-1. **TensorFlow import errors**:
-   - Ensure TensorFlow is properly installed: `pip install tensorflow`
-   - Try standalone Keras if TensorFlow issues persist
-
-2. **Memory issues**:
-   - Reduce batch size in the deep learning parameters
-   - Process systems one at a time by modifying the systems list
-
-3. **Slow execution**:
-   - Enable GPU support if available
-   - Reduce the number of systems for testing
-   - Reduce num_repeats (though this affects statistical validity)
-
-4. **Discrepancies in results**:
-   - Ensure random seeds are set correctly
-   - Verify dataset integrity
-   - Check for package version differences
-
-## Conclusion
-Following these steps should allow you to replicate the reported results within reasonable statistical variance. If significant discrepancies are observed, please check your environment setup and dataset preparation.
+Visualizations can be obtained by running the `visualize.ipynb` Jupyter Notebook
